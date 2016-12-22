@@ -1,7 +1,7 @@
 {
   "name": "wx-parser",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "parse dom to object",
   "main": "index.js",
   "directories": {
     "test": "test"
