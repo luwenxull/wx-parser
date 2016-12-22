@@ -1,7 +1,7 @@
 module.exports = {
-    entry: './app.js',
+    entry: './lib/wxParser.core.js',
     output: {
-        filename: 'bundle.js'
+        filename: 'wxParser.js'
     },
     module: {
         loaders: [{
