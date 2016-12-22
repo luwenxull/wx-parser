@@ -1,0 +1,29 @@
+{
+  "name": "wx-parser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "tsc":"tsc --outDir lib -p source",
+    "webpack": "webpack --config webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luwenxull/wx-parser.git"
+  },
+  "keywords": [],
+  "author": "luwenxull",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/luwenxull/wx-parser/issues"
+  },
+  "homepage": "https://github.com/luwenxull/wx-parser#readme",
+  "devDependencies": {
+    "babel-core": "^6.21.0",
+    "babel-loader": "^6.2.10",
+    "webpack": "^1.14.0"
+  }
+}

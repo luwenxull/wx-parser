@@ -1,0 +1,4 @@
+export let TEXTNODE='TEXTNODE';
+export let NODESTART='NODESTART';
+export let NODEEND='NODEEND';
+export let NODECLOSESELF='NODECLOSESELF'
