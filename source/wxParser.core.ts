@@ -1,4 +1,4 @@
-import { removeEqualSpace, removeMultiSpace } from "./wxParser.tool"
+import { removeEqualSpace, removeMultiSpace, removeAllSpace } from "./wxParser.tool"
 import { TEXTNODE, NODESTART, NODEEND, NODECLOSESELF } from "./wxParser.type"
 
 interface NodeResult {
@@ -67,11 +67,12 @@ class WxDomParser {
     make(result: NodeResult | TextResult, openTreeList) {
         let tree = openTreeList[openTreeList.length - 1];
         if (isText(result)) {
-            tree.children.push(
-                { nodeName: TEXTNODE, attr: [], children: [result.value] }
-            );
+            if (removeAllSpace(result.value).length !== 0) {
+                tree.children.push(
+                    { nodeName: TEXTNODE, attr: [], children: [result.value] }
+                );
+            }
         } else {
-
             if (result.endTagName) {
                 openTreeList.pop()
             } else {
