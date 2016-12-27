@@ -18,7 +18,7 @@ function isText(obj: NodeResult | TextResult): obj is TextResult {
     return (<TextResult>obj).type == TEXTNODE;
 }
 class WxDomParser {
-    public nodeRegex: RegExp = /(<(\w+)\s*([\s\S]*?)(\/){0,1}>)|<\/(\w+)>/g
+    public nodeRegex: RegExp = /(<(\w+)\s*([\s\S]*?)(\/){0,1}>)|<\/(\w+)>|(\{\w+\})/g
     public attrRegex: RegExp = /[\w\-]+=['"][\s\S]*?['"]/g
     parseStart(htmlStr): DomDescriptionItf {
         let matchResult = this.findAllNodes(htmlStr);
@@ -33,13 +33,20 @@ class WxDomParser {
                 startTagName = result[2],
                 attr = result[3],
                 endSelf = result[4],
-                endTagName = result[5];
+                endTagName = result[5],
+                exp = result[6];
             let index = result.index,
                 length = match.length;
             if (index > nextIndex) {
                 allMatches.push({
                     type: TEXTNODE,
                     value: htmlStr.slice(nextIndex, index)
+                })
+            }
+            if (exp) {
+                allMatches.push({
+                    type: TEXTNODE,
+                    value: exp
                 })
             }
             nextIndex = index + length;
