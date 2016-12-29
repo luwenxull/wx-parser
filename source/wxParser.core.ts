@@ -18,16 +18,16 @@ function isText(obj: NodeResult | TextResult): obj is TextResult {
     return (<TextResult>obj).type == TEXTNODE;
 }
 class WxDomParser {
-    public nodeRegex: RegExp = /(<(\w+)\s*([\s\S]*?)(\/){0,1}>)|<\/(\w+)>|(\{\w+\})/g
+    public nodeRegex: RegExp = /(<(\w+)\s*([\s\S]*?)(\/){0,1}>)|<\/(\w+)>/g
     public attrRegex: RegExp = /[\w\-]+=['"][\s\S]*?['"]/g
-    parseStart(htmlStr): DomDescriptionItf {
-        let matchResult = this.findAllNodes(htmlStr);
+    parseStart(htmlStr, optionRegex = this.nodeRegex): DomDescriptionItf {
+        let matchResult = this.findAllNodes(htmlStr, optionRegex);
         return this.makeWxTree(matchResult)
     }
-    findAllNodes(htmlStr) {
+    findAllNodes(htmlStr, optionRegex = this.nodeRegex) {
         let result;
         let allMatches: Array<NodeResult | TextResult> = [], nextIndex = 0;
-        while (result = this.nodeRegex.exec(htmlStr)) {
+        while (result = optionRegex.exec(htmlStr)) {
             let match = result[0],
                 startTag = result[1],
                 startTagName = result[2],
@@ -74,11 +74,9 @@ class WxDomParser {
     make(result: NodeResult | TextResult, openTreeList) {
         let tree = openTreeList[openTreeList.length - 1];
         if (isText(result)) {
-            if (removeAllSpace(result.value).length !== 0) {
-                tree.children.push(
-                    { nodeName: TEXTNODE, attr: [], children: [result.value] }
-                );
-            }
+            tree.children.push(
+                { nodeName: TEXTNODE, attr: [], children: [result.value] }
+            );
         } else {
             if (result.endTagName) {
                 openTreeList.pop()
