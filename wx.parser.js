@@ -1,0 +1,1 @@
+exports.wxParser=require('./lib/wxParser.core')['default']();
