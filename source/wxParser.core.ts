@@ -15,7 +15,7 @@ interface DomDescriptionItf {
 }
 
 function isText(obj: NodeResult | TextResult): obj is TextResult {
-    return (<TextResult>obj).type == TEXTNODE;
+    return obj && (<TextResult>obj).type == TEXTNODE;
 }
 class WxDomParser {
     public nodeRegex: RegExp = /(<(\w+)\s*([\s\S]*?)(\/){0,1}>)|<\/(\w+)>/g
