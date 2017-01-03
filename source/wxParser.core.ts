@@ -66,17 +66,25 @@ class WxDomParser {
     }
     makeWxTree(results: (NodeResult | TextResult)[]) {
         let openTreeList: DomDescriptionItf[] = [{ nodeName: 'ROOT', attr: [], children: [] }];
-        for (let node of results) {
-            this.make(node, openTreeList);
+        for (let i = 0; i < results.length; i++) {
+            this.make(results[i], results[i - 1], results[i + 1], openTreeList)
         }
         return openTreeList[0]
     }
-    make(result: NodeResult | TextResult, openTreeList) {
+    make(result: NodeResult | TextResult, last, next, openTreeList) {
         let tree = openTreeList[openTreeList.length - 1];
         if (isText(result)) {
-            tree.children.push(
-                { nodeName: TEXTNODE, attr: [], children: [result.value] }
-            );
+            if (!isText(last) && !isText(next)) {
+                if (removeAllSpace(result.value) !== '') {
+                    tree.children.push(
+                        { nodeName: TEXTNODE, attr: [], children: [result.value] }
+                    );
+                }
+            } else {
+                tree.children.push(
+                    { nodeName: TEXTNODE, attr: [], children: [result.value] }
+                );
+            }
         } else {
             if (result.endTagName) {
                 openTreeList.pop()
@@ -109,13 +117,4 @@ class WxDomParser {
     }
 }
 
-
-let wxDomParserFactory: () => WxDomParser = (function () {
-    let wxDomParser;
-    return function () {
-        return wxDomParser || (wxDomParser = new WxDomParser())
-    }
-})()
-
-
-export default wxDomParserFactory
+export default new WxDomParser()
