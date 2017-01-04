@@ -1,8 +1,8 @@
 import { removeEqualSpace, removeMultiSpace, removeAllSpace } from "./wxParser.tool"
-import { TEXTNODE, NODESTART, NODEEND, NODECLOSESELF } from "./wxParser.type"
+import { TEXTNODE, NODESTART, COMMENTNODE, NODEEND, NODECLOSESELF, COMMENTSTART, COMMENTEND } from "./wxParser.type"
 
 interface NodeResult {
-    type: string, match, startTag, attr, startTagName, endSelf, endTagName, index: number, length: number
+    type: string, match, startTag, attr, startTagName, endSelf, endTagName, startComment, endComment, index: number, length: number
 }
 interface TextResult {
     type: string, value: string
@@ -18,7 +18,7 @@ function isText(obj: NodeResult | TextResult): obj is TextResult {
     return obj && (<TextResult>obj).type == TEXTNODE;
 }
 class WxDomParser {
-    public nodeRegex: RegExp = /(<(\w+)\s*([\s\S]*?)(\/){0,1}>)|<\/(\w+)>/g
+    public nodeRegex: RegExp = /(<(\w+)\s*([\s\S]*?)(\/){0,1}>)|<\/(\w+)>|(\{:{0,1}\w+?\})|(<!--)|(-->)/g
     public attrRegex: RegExp = /[\w\-]+=['"][\s\S]*?['"]/g
     parseStart(htmlStr, optionRegex = this.nodeRegex): DomDescriptionItf {
         let matchResult = this.findAllNodes(htmlStr, optionRegex);
@@ -34,7 +34,9 @@ class WxDomParser {
                 attr = result[3],
                 endSelf = result[4],
                 endTagName = result[5],
-                exp = result[6];
+                exp = result[6],
+                startComment = result[7],
+                endComment = result[8];
             let index = result.index,
                 length = match.length;
             if (index > nextIndex) {
@@ -52,14 +54,18 @@ class WxDomParser {
             nextIndex = index + length;
             let type;
             if (startTagName) {
-                type = NODESTART;
+                type = NODESTART
             } else if (endTagName) {
-                type = NODEEND;
+                type = NODEEND
+            } else if (startComment) {
+                type = COMMENTSTART;
+            } else if (endComment) {
+                type = COMMENTEND
             } else {
-                type = NODECLOSESELF;
+                type = NODECLOSESELF
             }
             allMatches.push({
-                type, match, attr, startTag, startTagName, endSelf, endTagName, index, length
+                type, match, attr, startTag, startTagName, endSelf, endTagName, startComment, endComment, index, length
             })
         }
         return allMatches
@@ -86,18 +92,25 @@ class WxDomParser {
                 );
             }
         } else {
-            if (result.endTagName) {
+            if (result.endTagName || result.endComment) {
                 openTreeList.pop()
             } else {
-                let nodeName = result.startTagName;
+                let nodeName = result.startTagName, startComment = result.startComment;
                 if (result.endSelf) {
                     tree.children.push(
                         { nodeName: nodeName, attr: this.getAttributes(result.attr), children: [] }
                     )
-                } else if (nodeName) {
-                    let newOpenTree = { nodeName: nodeName, attr: this.getAttributes(result.attr), children: [] }
-                    tree.children.push(newOpenTree);
-                    openTreeList.push(newOpenTree)
+                } else {
+                    if (nodeName) {
+                        let newOpenTree = { nodeName: nodeName, attr: this.getAttributes(result.attr), children: [] }
+                        tree.children.push(newOpenTree);
+                        openTreeList.push(newOpenTree);
+                    }
+                    if (startComment) {
+                        let newOpenTree = { nodeName: COMMENTNODE, attr: [], children: [] }
+                        tree.children.push(newOpenTree);
+                        openTreeList.push(newOpenTree);
+                    }
                 }
             }
         }
